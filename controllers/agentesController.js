@@ -1,4 +1,6 @@
 const agentesRepository = require('../repositories/agentesRepository')
+const { v4: uuidv4 } = require('uuid')
+
 
 function getAllAgentes(req, res) {
         const agentes = agentesRepository.findAll()
@@ -16,9 +18,10 @@ function getAgenteById(req, res) {
 }
 
 function createAgente(req, res) {
-        const { id, nome, dataDeIncorporacao, cargo } = req.body
+        const { nome, dataDeIncorporacao, cargo } = req.body
+        const id = uuidv4()
 
-        if (!id || !nome || !dataDeIncorporacao || !cargo)
+        if (!nome || !dataDeIncorporacao || !cargo)
                 return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
 
         const newAgente = { id, nome, dataDeIncorporacao, cargo }
@@ -31,7 +34,7 @@ function updateAgente(req, res) {
         const { id } = req.params
         const { nome, dataDeIncorporacao, cargo } = req.body
 
-        if (!id || !nome || !dataDeIncorporacao || !cargo)
+        if (!nome || !dataDeIncorporacao || !cargo)
                 return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
 
         const agenteAtualizado = agentesRepository.update({ id, nome, dataDeIncorporacao, cargo })
@@ -39,7 +42,7 @@ function updateAgente(req, res) {
         if (!agenteAtualizado)
                 return res.status(404).json({ message: "Agente não encontrado!" })
 
-        res.status(204).json({ message: "Dados do agente atualizado com sucesso: ", agenteAtualizado })
+        res.status(200).json({ message: "Dados do agente atualizado com sucesso: ", agenteAtualizado })
 }
 
 function patchAgente(req, res) {
@@ -51,7 +54,7 @@ function patchAgente(req, res) {
         if (!patchedAgente)
                 return res.status(404).json({ message: "Agente não encontrado!" })
 
-        res.status(204).json({ message: "Dado do agente atualizado com sucesso: ", patchedAgente })
+        res.status(200).json({ message: "Dado do agente atualizado com sucesso: ", patchedAgente })
 }
 
 function deleteAgente(req, res) {

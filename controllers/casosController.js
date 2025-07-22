@@ -1,8 +1,8 @@
 const casosRepository = require("../repositories/casosRepository")
+const { v4: uuidv4 } = require('uuid')
 
 
 function getAllCasos(req, res) {
-
         const casos = casosRepository.findAll()
         res.status(200).json(casos)
 }
@@ -18,9 +18,10 @@ function getSpecificCase(req, res) {
 }
 
 function createCase(req, res) {
-    const { id, titulo, descricao, status, agente_id } = req.body
-
-    if (!id || !titulo || !descricao || !status || !agente_id)
+    const { titulo, descricao, status, agente_id } = req.body
+    const id = uuidv4()
+    
+    if (!titulo || !descricao || !status || !agente_id)
         return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
 
     if (status !== "aberto" && status !== "solucionado")
@@ -47,7 +48,7 @@ function updateCase(req, res) {
     if(!updatedCase)
         return res.status(400).json({message: "Caso não encontrado!"})
 
-    res.status(204).json({message: "Caso atualizado!", caso: updatedCase })
+    res.status(200).json({message: "Caso atualizado!", caso: updatedCase })
 }
 
 function patchCase(req, res){
@@ -58,7 +59,7 @@ function patchCase(req, res){
     if(!updatedCase)
         return res.status(404).json({message: "Caso não encontrado!"})
 
-    res.status(204).json({message: "Caso atualizado parcialmente", updatedCase})
+    res.status(200).json({message: "Caso atualizado parcialmente", updatedCase})
 }
 
 function deleteCase (req, res){
