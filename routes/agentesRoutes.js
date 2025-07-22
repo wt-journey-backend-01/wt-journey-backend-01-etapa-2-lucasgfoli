@@ -2,8 +2,11 @@ const express = require('express')
 const router = express.Router()
 const agentesController = require('../controllers/agentesController.js')
 
-router.get('/agentes', agentesController.listarAgentes)
+router.get('/agentes', agentesController.getAllAgentes)
+router.get('/agentes/:id', agentesController.getAgenteById)
+router.post('/agentes', agentesController.createAgente)
+router.put('/agentes/:id', agentesController.updateAgente)
+router.patch('/agentes/:id', agentesController.patchAgente)
+router.delete('/agentes/:id', agentesController.deleteAgente)
 
-
-// router.get('/agentes/:id', agentesController.listarAgentes)
-
+module.exports = router

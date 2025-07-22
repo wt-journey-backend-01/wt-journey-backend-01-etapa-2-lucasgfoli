@@ -4,14 +4,7 @@ const casosRepository = require("../repositories/casosRepository")
 function getAllCasos(req, res) {
 
         const casos = casosRepository.findAll()
-        res.json(casos)
-}
-
-
-function getAllCasos(req, res) {
-
-    const casos = casosRepository.findAll()
-    res.status(200).json(casos)
+        res.status(200).json(casos)
 }
 
 function getSpecificCase(req, res) {
@@ -54,7 +47,7 @@ function updateCase(req, res) {
     if(!updatedCase)
         return res.status(400).json({message: "Caso não encontrado!"})
 
-    res.status(200).json({message: "Caso atualizado!", caso: updatedCase })
+    res.status(204).json({message: "Caso atualizado!", caso: updatedCase })
 }
 
 function patchCase(req, res){
@@ -65,7 +58,7 @@ function patchCase(req, res){
     if(!updatedCase)
         return res.status(404).json({message: "Caso não encontrado!"})
 
-    res.status(200).json({message: "Caso atualizado parcialmente", updatedCase})
+    res.status(204).json({message: "Caso atualizado parcialmente", updatedCase})
 }
 
 function deleteCase (req, res){

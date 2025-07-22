@@ -9,3 +9,4 @@ router.put('/casos/:id', casosController.updateCase)
 router.patch('/casos/:id', casosController.patchCase)
 router.delete('/casos/:id', casosController.deleteCase)
 
+module.exports = router
