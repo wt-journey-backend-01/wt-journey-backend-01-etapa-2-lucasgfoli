@@ -3,3 +3,9 @@ const router = express.Router()
 const casosController = require('../controllers/casosController.js')
 
 router.get('/casos', casosController.getAllCasos)
+router.get('/casos/:id', casosController.getSpecificCase)
+router.post('/casos', casosController.createCase)
+router.put('/casos/:id', casosController.updateCase)
+router.patch('/casos/:id', casosController.patchCase)
+router.delete('/casos/:id', casosController.deleteCase)
+
