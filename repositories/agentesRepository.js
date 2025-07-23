@@ -23,7 +23,6 @@ function update({id, nome, dataDeIncorporacao, cargo}){
     const agente = agentes.find(agente => agente.id === id)
 
     if(agente){
-        agente.id = id;
         agente.nome = nome;
         agente.dataDeIncorporacao = dataDeIncorporacao;
         agente.cargo = cargo;
@@ -35,6 +34,11 @@ function update({id, nome, dataDeIncorporacao, cargo}){
 function patchById(id, updates){
     const agente = agentes.find(agente => agente.id === id)
     
+    if(!agente)
+        return null
+
+    delete updates.id
+
     Object.keys(updates).forEach(prop => {
         if(updates[prop] !== undefined)
             agente[prop] = updates[prop]
