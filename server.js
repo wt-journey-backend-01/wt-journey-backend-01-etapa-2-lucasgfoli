@@ -6,7 +6,7 @@ const casosRoutes = require('./routes/casosRoutes.js')
 const swaggerUi = require('swagger-ui-express')
 const swaggerSpec = require('./docs/swagger.js')
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)) // Documentação
 app.use(express.json())
 app.use('/agentes', agentesRoutes)
 app.use('/casos', casosRoutes)
