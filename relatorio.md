@@ -1,124 +1,76 @@
 <sup>Esse é um feedback gerado por IA, ele pode conter erros.</sup>
 
-Você tem 7 créditos restantes para usar o sistema de feedback AI.
+Você tem 6 créditos restantes para usar o sistema de feedback AI.
 
 # Feedback para lucasgfoli:
 
-Nota final: **78.9/100**
+Nota final: **95.6/100**
 
-# Feedback para você, lucasgfoli! 🚀✨
+# Feedback para lucasgfoli 🚓✨
 
-Olá! Antes de tudo, parabéns pelo empenho e pela organização do seu projeto! 🎉 Dá pra ver que você estruturou bem o código, separando controllers, repositories e rotas, e ainda integrou a documentação Swagger, o que é um grande diferencial! 👏
+Olá, lucasgfoli! Primeiramente, parabéns pelo esforço e dedicação na construção dessa API para o Departamento de Polícia! 🎉 Seu código está muito bem organizado, e dá para perceber que você entendeu e aplicou com maestria a arquitetura modular com rotas, controllers e repositories. Isso é fundamental para manter o projeto escalável e fácil de manter. 👏
 
 ---
 
 ## 🎯 Pontos Fortes que Merecem Destaque
 
-- **Arquitetura modular:** Você organizou muito bem seu projeto com rotas, controllers e repositories separados. Isso é fundamental para escalabilidade e manutenção. Seu `server.js` está limpo e direto ao ponto, importando as rotas e configurando o middleware JSON.
+- Sua **estrutura de diretórios** está impecável, exatamente como esperado. Você separou bem as responsabilidades entre `routes`, `controllers`, `repositories`, `utils` e `docs`. Isso mostra maturidade e organização no seu código.
 
-- **Implementação dos endpoints principais:** Os métodos HTTP para `/agentes` e `/casos` estão implementados, com tratamento de erros e validações básicas, o que já é um grande avanço.
+- Implementou todos os métodos HTTP (GET, POST, PUT, PATCH, DELETE) para os recursos `/agentes` e `/casos` com validações e tratamento de erros. Isso é essencial para uma API RESTful robusta.
 
-- **Validação de dados:** Você fez uma validação bacana na data de incorporação dos agentes e no status dos casos, garantindo que os dados estejam coerentes.
+- O uso do `uuid` para gerar IDs únicos está correto e bem aplicado.
 
-- **Filtros básicos funcionando:** Legal que você implementou filtros simples para casos por status e agente, e para agentes por cargo e data de incorporação.
+- A validação da data de incorporação dos agentes está muito bem feita, com regex e lógica para evitar datas futuras. Isso demonstra cuidado com a qualidade dos dados.
 
-- **Documentação Swagger:** A documentação está bem detalhada, com schemas e descrições, o que facilita muito para quem for consumir sua API.
+- Você implementou filtros para os endpoints, como filtrar agentes por cargo e data, e casos por status e agente responsável. Isso é um bônus muito legal e mostra que você foi além do básico! 🌟
 
-- **Bônus conquistados:** Você acertou na filtragem de casos por status e agente (filtros simples), o que mostra que está indo além do básico! 🎉
-
----
-
-## 🔍 Pontos de Atenção e Como Melhorar (Vamos juntos!)
-
-### 1. Atualização total (PUT) e parcial (PATCH) de agentes e casos: status code e retorno
-
-Ao olhar seu `agentesController.js`, na função `updateAgente`, você faz o seguinte retorno:
-
-```js
-res.status(200).json({ message: "Dados do agente atualizado com sucesso: ", agenteAtualizado })
-```
-
-E no `patchAgente`:
-
-```js
-res.status(200).json({ message: "Dado do agente atualizado com sucesso: ", patchedAgente })
-```
-
-O problema é que o objeto retornado tem a mensagem e o agente dentro da mesma estrutura, mas o ideal é que o corpo da resposta seja o recurso atualizado diretamente, sem misturar com mensagem, para facilitar o consumo da API.
-
-Além disso, na função `updateCase` do `casosController.js`, você faz:
-
-```js
-if (!updatedCase)
-    return res.status(400).json({ message: "Caso não encontrado!" })
-```
-
-Aqui o código 400 (Bad Request) não é o mais adequado para um recurso não encontrado. O correto é usar **404 (Not Found)** para indicar que o caso a ser atualizado não existe.
-
-**Como corrigir:**
-
-- No `updateCase`, troque para:
-
-```js
-if (!updatedCase)
-    return res.status(404).json({ message: "Caso não encontrado!" })
-```
-
-- Nos retornos de update e patch, retorne o recurso atualizado diretamente, por exemplo:
-
-```js
-res.status(200).json(agenteAtualizado)
-```
-
-ou
-
-```js
-res.status(200).json(patchedAgente)
-```
-
-Isso segue o padrão REST e facilita a integração.
+- A documentação Swagger está completa e bem detalhada, facilitando o entendimento e uso da API.
 
 ---
 
-### 2. Validação da alteração do ID — um detalhe que impacta sua API!
+## 🔍 Análise das Áreas para Melhorar e Aprimorar
 
-Percebi que você não está protegendo o campo `id` contra alterações via PUT ou PATCH, tanto em agentes quanto em casos. Isso é um problema porque o ID é a identidade única do recurso e não deve ser alterado.
+### 1. Penalidade: Permite alteração do ID nos métodos PUT para agentes e casos
 
-No seu `patchById` do `agentesRepository.js`, você até tenta evitar isso:
+**O que aconteceu?**
 
-```js
-delete updates.id
-```
-
-Mas no `update` (PUT) do agente e do caso, você aceita o objeto inteiro e atualiza os campos diretamente, o que permite que o ID seja modificado:
+Eu vi que nos controllers `updateAgente` e `updateCase` você está removendo o `id` do `req.body` com `delete req.body.id` para tentar evitar que o ID seja alterado:
 
 ```js
-function update({id, nome, dataDeIncorporacao, cargo}){
-    const agente = agentes.find(agente => agente.id === id)
-
-    if(agente){
-        agente.nome = nome;
-        agente.dataDeIncorporacao = dataDeIncorporacao;
-        agente.cargo = cargo;
-        return agente
-    } else
-        return null
+function updateAgente(req, res) {
+    const { id } = req.params
+    delete req.body.id
+    const { nome, dataDeIncorporacao, cargo } = req.body
+    // ...
 }
 ```
 
-Aqui, o parâmetro `id` vem da URL, mas você não impede que o corpo da requisição tenha um `id` diferente, que poderia ser usado para alterar o ID.
+No entanto, isso não impede que o cliente envie um payload com o campo `id` — você só está deletando ele do objeto `req.body`, mas depois está atualizando o agente com os dados que vieram no corpo, e o ID do agente pode acabar sendo alterado se você não cuidar disso na camada de repositório.
 
 **Por que isso é um problema?**
 
-- O ID deve ser imutável, pois é a chave para identificar o recurso.
-- Permitir alteração pode causar inconsistências e bugs difíceis de rastrear.
+O ID é o identificador único do recurso e **não deve ser alterado** em nenhuma atualização. Permitir que o ID seja modificado pode causar inconsistências, problemas de integridade e até perda de dados.
 
-**Como proteger o ID?**
+**Como corrigir?**
 
-- Na função `update`, não permita que o ID do corpo substitua o ID do recurso. Use sempre o ID da URL para buscar e atualizar.
-- Ignore o campo `id` que vier no corpo da requisição.
+No seu repositório, o método `update` para agentes:
 
-Exemplo para o controller:
+```js
+function update(id, { nome, dataDeIncorporacao, cargo }) {
+    const agente = agentes.find(agente => agente.id === id)
+    if (!agente) return null
+
+    agente.nome = nome
+    agente.dataDeIncorporacao = dataDeIncorporacao
+    agente.cargo = cargo
+
+    return agente
+}
+```
+
+Aqui você não está atualizando o `id`, o que é ótimo! Mas no controller, você deve garantir que o objeto passado para `update` não contenha o `id`. Embora você use `delete req.body.id`, o ideal é extrair explicitamente os campos permitidos, evitando que qualquer outro campo seja passado.
+
+**Sugestão de melhoria no controller:**
 
 ```js
 function updateAgente(req, res) {
@@ -126,10 +78,14 @@ function updateAgente(req, res) {
         const { id } = req.params
         const { nome, dataDeIncorporacao, cargo } = req.body
 
-        // Validação omitida para brevidade
+        if (!validarData(dataDeIncorporacao))
+            return res.status(400).json({ message: "Data de incorporação inválida! Use o formato YYYY-MM-DD e não informe datas futuras." })
 
-        // Crie um objeto de atualização sem o id
-        const agenteAtualizado = agentesRepository.update({ id, nome, dataDeIncorporacao, cargo })
+        if (!nome || !dataDeIncorporacao || !cargo)
+            return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
+
+        // Passar explicitamente só os campos permitidos
+        const agenteAtualizado = agentesRepository.update(id, { nome, dataDeIncorporacao, cargo })
 
         if (!agenteAtualizado)
             return res.status(404).json({ message: "Agente não encontrado!" })
@@ -141,116 +97,117 @@ function updateAgente(req, res) {
 }
 ```
 
-E no repository, ignore qualquer `id` vindo no objeto, só atualize os campos permitidos.
-
----
-
-### 3. Formato inconsistente da data de incorporação dos agentes no repositório
-
-No seu array inicial de agentes (`repositories/agentesRepository.js`), o agente tem a data no formato:
-
-```json
-"dataDeIncorporacao": "1992/10/04"
-```
-
-Mas em suas validações e documentação, espera-se o formato `YYYY-MM-DD` (com hífens, não barras), por exemplo `"1992-10-04"`.
-
-Isso pode gerar problemas de filtro e comparação, pois o formato não bate.
-
-**Como corrigir?**
-
-Altere o formato da data no array inicial para:
+Faça o mesmo para o `updateCase` no `casosController.js`:
 
 ```js
-"dataDeIncorporacao": "1992-10-04"
+function updateCase(req, res) {
+    try {
+        const { id } = req.params
+        const { titulo, descricao, status, agente_id } = req.body
+        
+        // ... validações ...
+
+        const updatedCase = casosRepository.update(id, titulo, descricao, status, agente_id)
+
+        if (!updatedCase)
+            return res.status(404).json({ message: "Caso não encontrado!" })
+
+        res.status(200).json(updatedCase)
+    } catch (error) {
+        handlerError(res, error)
+    }
+}
 ```
 
-Assim, a validação e os filtros funcionarão corretamente.
+**Por que isso importa?** Porque no seu repositório, o método `update` para casos recebe os campos individualmente, então não há risco de atualizar o `id` se você passar os parâmetros corretos. Mas se você passar um objeto com `id` para o patch, pode dar problema.
 
 ---
 
-### 4. Mensagens de erro customizadas para filtros e argumentos inválidos
+### 2. Falha nos testes bônus relacionados a filtragem avançada e mensagens de erro customizadas
 
-Notei que alguns filtros e argumentos inválidos não retornam mensagens de erro personalizadas, o que dificulta para o cliente entender o que aconteceu.
+Você implementou filtros básicos muito bem, como filtrar casos por status e agente, e agentes por cargo. Porém, algumas funcionalidades extras não passaram, como:
 
-Por exemplo, no filtro de agentes por `dataDeIncorporacao` ou `cargo`, se o valor for inválido ou não existir, você simplesmente retorna um array vazio, sem indicar que o filtro pode estar errado.
+- Filtragem de agentes por data de incorporação com ordenação ascendente e descendente
+- Busca por palavras-chave no título e descrição dos casos
+- Mensagens de erro customizadas para argumentos inválidos
 
-Para melhorar, você pode validar os parâmetros de query e, se inválidos, retornar um erro 400 com mensagem clara.
+**O que eu percebi no seu código?**
 
----
+- Na função `getAllAgentes` você já tem o filtro por `dataDeIncorporacao` e ordenação por qualquer campo, mas o parâmetro `order` é usado sem validação rigorosa (você só confere se é `'desc'` para inverter a ordem).
 
-### 5. Filtros avançados e busca por palavras-chave (Bônus não implementado)
+- Na função `getAllCasos`, você implementou o filtro por `search` (palavra-chave), mas ele não está documentado no Swagger, e também não está claro se o filtro está funcionando perfeitamente para todos os casos.
 
-Você já implementou filtros simples, mas os filtros mais complexos, como busca por palavras-chave no título/descrição dos casos, ordenação decrescente, e busca do agente responsável pelo caso, ainda não estão implementados.
+- As mensagens de erro são claras, mas talvez não estejam exatamente nos formatos esperados nos testes bônus.
 
-Esses recursos são desafiadores, mas vão deixar sua API muito mais poderosa e flexível! Vale a pena dar uma olhada para evoluir seu projeto.
+**Dica para melhorar:**
 
----
+- Valide o parâmetro `order` para aceitar somente `'asc'` ou `'desc'` e retorne erro para valores inválidos, como você fez no `getAllCasos`.
 
-## 📚 Recursos para você aprofundar e corrigir os pontos acima
+- Documente todos os parâmetros de query no Swagger, incluindo `search` para casos e `order` para agentes.
 
-- [Documentação oficial do Express.js sobre roteamento](https://expressjs.com/pt-br/guide/routing.html) — para entender melhor como organizar e proteger suas rotas e parâmetros.
+- Para mensagens de erro personalizadas, mantenha um padrão consistente, por exemplo:
 
-- [Validação de dados em APIs Node.js/Express](https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_) — para garantir que seus dados estejam sempre corretos e evitar bugs.
-
-- [Status HTTP 400 e 404 na MDN](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/400) e [404](https://developer.mozilla.org/pt-BR/docs/Web/HTTP/Status/404) — para entender quando usar cada código corretamente.
-
-- [Manipulação de arrays em JavaScript](https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI) — para melhorar os filtros e buscas no seu repositório.
-
-- [Arquitetura MVC em Node.js](https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH) — para fortalecer sua organização de código.
-
----
-
-## 🗂️ Sobre a Estrutura de Diretórios
-
-Sua estrutura está muito bem organizada, seguindo o padrão esperado:
-
-```
-.
-├── controllers/
-│   ├── agentesController.js
-│   └── casosController.js
-├── repositories/
-│   ├── agentesRepository.js
-│   └── casosRepository.js
-├── routes/
-│   ├── agentesRoutes.js
-│   └── casosRoutes.js
-├── docs/
-│   └── swagger.js
-├── utils/
-│   └── errorHandler.js
-├── server.js
-├── package.json
+```json
+{
+  "message": "O status do caso deve ser 'aberto' ou 'solucionado'"
+}
 ```
 
-Continue mantendo essa disciplina! Isso facilita muito a manutenção e evolução do projeto. 👏
+Evite mensagens genéricas ou que não informem exatamente qual parâmetro está errado.
 
 ---
 
-## 📝 Resumo dos Principais Pontos para Focar
+### 3. Dicas gerais para validação e segurança dos dados
 
-- 🚫 **Impedir alteração do campo `id` nos métodos PUT e PATCH** para agentes e casos. O ID deve ser imutável.
+- **Evite modificar diretamente o objeto `req.body`**, como você faz com `delete req.body.id`. Isso pode causar efeitos colaterais inesperados. Prefira extrair os campos que você quer usar explicitamente, como mostrado acima.
 
-- 🔄 **Corrigir os status HTTP para 404 (Not Found)** quando o recurso não existir, especialmente em atualizações.
-
-- 📅 **Padronizar o formato da data de incorporação** para `YYYY-MM-DD` (com hífens) em todo o código, inclusive no array inicial.
-
-- 💬 **Melhorar mensagens de erro customizadas** para filtros e argumentos inválidos, retornando status 400 com explicação clara.
-
-- 🔎 **Implementar filtros avançados e busca por palavras-chave** para casos e agentes, para enriquecer sua API.
-
-- 📦 **Manter a excelente organização da estrutura do projeto**.
+- Na função `patchAgente` e `patchCase`, você permite atualizar parcialmente os objetos, mas não está validando os valores dos campos atualizados (por exemplo, se `dataDeIncorporacao` é uma data válida no patch do agente). Seria interessante adicionar essa validação para evitar dados inválidos.
 
 ---
 
-## Finalizando... 🚀
+## 📚 Recursos para você continuar evoluindo
 
-Você está no caminho certo, lucasgfoli! Seu código mostra maturidade e compromisso com boas práticas. Corrigindo esses detalhes, sua API vai ficar ainda mais robusta, confiável e pronta para o mundo real! 💪
+- Para reforçar o entendimento sobre **validação de dados e tratamento de erros HTTP**, recomendo este vídeo muito bom:  
+https://youtu.be/yNDCRAz7CM8?si=Lh5u3j27j_a4w3A_
 
-Continue estudando e explorando os recursos que indiquei, e não hesite em testar bastante e pedir ajuda quando precisar. Estou aqui para te apoiar nessa jornada! 😉
+- Para aprofundar na **estrutura de projetos Node.js com Express e arquitetura MVC**, veja este vídeo:  
+https://youtu.be/bGN_xNc4A1k?si=Nj38J_8RpgsdQ-QH
 
-Boa sorte e até a próxima revisão! 👊✨
+- Para entender melhor o **protocolo HTTP, métodos e status codes**, que são a base para APIs RESTful, este vídeo é ótimo:  
+https://youtu.be/RSZHvQomeKE?si=caHW7Ra1ce0iHg8Z
+
+- Para manipulação de arrays e filtros, que são muito usados nos seus controllers, vale a pena revisar:  
+https://youtu.be/glSgUKA5LjE?si=t9G2NsC8InYAU9cI
+
+---
+
+## 📝 Resumo dos Pontos para Focar
+
+- 🚫 **Não permitir alteração do ID** em atualizações (PUT e PATCH). Extraia explicitamente os campos permitidos no controller antes de enviar para o repositório.
+
+- 🛠️ **Aprimorar validações nos métodos PATCH**, garantindo que os dados parciais sejam validados (ex: data válida, status correto).
+
+- 📄 **Documentar todos os parâmetros de query** usados nos endpoints no Swagger, como `search` e `order`.
+
+- 🔍 **Validar rigorosamente parâmetros de ordenação (`order`)** e retornar erros claros para valores inválidos.
+
+- 💬 **Padronizar e personalizar as mensagens de erro** para melhorar a comunicação da API com o cliente.
+
+---
+
+## Conclusão
+
+lucasgfoli, você mandou muito bem! Seu código está limpo, organizado e funcional na maior parte. Os pequenos ajustes que sugeri vão deixar sua API ainda mais robusta e profissional, além de garantir que o cliente nunca consiga alterar IDs indevidamente e que sua API retorne mensagens claras e úteis para quem a consome.
+
+Continue assim, porque você está no caminho certo para se tornar um(a) expert em APIs REST com Node.js e Express! 🚀
+
+Se precisar, volte aos vídeos que indiquei para reforçar conceitos importantes. E lembre-se: cada detalhe que você aprimora no seu código é um passo a mais para projetos cada vez melhores.
+
+Grande abraço e sucesso no seu aprendizado! 👊😄
+
+---
+
+Se quiser conversar mais sobre algum ponto específico, é só chamar! Estou aqui para ajudar. 😉
 
 > Caso queira tirar uma dúvida específica, entre em contato com o Chapter no nosso [discord](https://discord.gg/DryuHVnz).
 
