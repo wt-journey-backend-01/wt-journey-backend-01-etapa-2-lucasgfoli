@@ -2,7 +2,7 @@ const agentes = [
 {
   "id": "401bccf5-cf9e-489d-8412-446cd169a0f1",
   "nome": "Rommel Carneiro",
-  "dataDeIncorporacao": "1992/10/04",
+  "dataDeIncorporacao": "1992-10-04",
   "cargo": "delegado"
 },
 ]
@@ -19,16 +19,15 @@ function create(novoAgente){
     agentes.push(novoAgente)
 }
 
-function update({id, nome, dataDeIncorporacao, cargo}){
+function update(id, { nome, dataDeIncorporacao, cargo }) {
     const agente = agentes.find(agente => agente.id === id)
+    if (!agente) return null
 
-    if(agente){
-        agente.nome = nome;
-        agente.dataDeIncorporacao = dataDeIncorporacao;
-        agente.cargo = cargo;
-        return agente
-    } else
-        return null
+    agente.nome = nome
+    agente.dataDeIncorporacao = dataDeIncorporacao
+    agente.cargo = cargo
+
+    return agente
 }
 
 function patchById(id, updates){

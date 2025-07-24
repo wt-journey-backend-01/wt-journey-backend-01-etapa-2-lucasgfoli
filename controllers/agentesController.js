@@ -4,19 +4,31 @@ const handlerError = require('../utils/errorHandler')
 
 function getAllAgentes(req, res) {
     try {
-        const { cargo, dataDeIncorporacao, orderBy } = req.query
+        const { cargo, dataDeIncorporacao, orderBy, order } = req.query
         let agentes = agentesRepository.findAll()
 
-        if (cargo)
-            agentes = agentes.filter(agente => agente.cargo === cargo)
+        if (cargo) {
+            const cargosValidos = ['delegado', 'investigador', 'escrivao', 'policial']
+            if (!cargosValidos.includes(cargo.toLowerCase()))
+                return res.status(400).json({ message: `Cargo inválido! Os valores permitidos são: ${cargosValidos.join(', ')}` })
 
-        if (dataDeIncorporacao)
+            agentes = agentes.filter(agente =>
+                agente.cargo && agente.cargo.toLowerCase() === cargo.toLowerCase()
+            )
+        }
+
+        if (dataDeIncorporacao) {
+            if (!validarData(dataDeIncorporacao))
+                return res.status(400).json({ message: "Data de incorporação inválida! Use o formato YYYY-MM-DD e não informe datas futuras." })
+
             agentes = agentes.filter(agente => agente.dataDeIncorporacao === dataDeIncorporacao)
+        }
 
         if (orderBy) {
+            const ordem = order === 'desc' ? -1 : 1
             agentes.sort((a, b) => {
-                if (a[orderBy] < b[orderBy]) return -1
-                if (a[orderBy] > b[orderBy]) return 1
+                if (a[orderBy] < b[orderBy]) return -1 * ordem
+                if (a[orderBy] > b[orderBy]) return 1 * ordem 
                 return 0
             })
         }
@@ -63,6 +75,7 @@ function createAgente(req, res) {
 function updateAgente(req, res) {
     try {
         const { id } = req.params
+        delete req.body.id
         const { nome, dataDeIncorporacao, cargo } = req.body
 
         if (!validarData(dataDeIncorporacao))
@@ -71,12 +84,12 @@ function updateAgente(req, res) {
         if (!nome || !dataDeIncorporacao || !cargo)
             return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
 
-        const agenteAtualizado = agentesRepository.update({ id, nome, dataDeIncorporacao, cargo })
+        const agenteAtualizado = agentesRepository.update(id, { nome, dataDeIncorporacao, cargo })
 
         if (!agenteAtualizado)
             return res.status(404).json({ message: "Agente não encontrado!" })
 
-        res.status(200).json({ message: "Dados do agente atualizado com sucesso: ", agenteAtualizado })
+        res.status(200).json(agenteAtualizado)
     } catch (error) {
         handlerError(res, error)
     }
@@ -85,14 +98,15 @@ function updateAgente(req, res) {
 function patchAgente(req, res) {
     try {
         const { id } = req.params
+        delete req.body.id
         const updates = req.body
         const camposValidos = ['nome', 'dataDeIncorporacao', 'cargo']
 
-        const camposAtulizaveis = Object.keys(updates).filter(campo => {
+        const camposAtualizaveis = Object.keys(updates).filter(campo => {
             return camposValidos.includes(campo)
         })
 
-        if (camposAtulizaveis.length === 0)
+        if (camposAtualizaveis.length === 0)
             return res.status(400).json({ message: "Deve conter pelo menos um campo válido!" })
 
         const patchedAgente = agentesRepository.patchById(id, updates)
@@ -100,7 +114,7 @@ function patchAgente(req, res) {
         if (!patchedAgente)
             return res.status(404).json({ message: "Agente não encontrado!" })
 
-        res.status(200).json({ message: "Dado do agente atualizado com sucesso: ", patchedAgente })
+        res.status(200).json(patchedAgente)
     } catch (error) {
         handlerError(res, error)
     }

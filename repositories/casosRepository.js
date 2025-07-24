@@ -22,19 +22,18 @@ function create(newCase){
     casos.push(newCase)
 }
 
-function update(id, titulo, descricao, status, agente_id){
-    const caso = casos.find(caso => caso.id === id)
+function update(id, titulo, descricao, status, agente_id) {
+    const caso = casos.find(c => c.id === id)
 
-    if(caso){
-        caso.titulo = titulo;
-        caso.descricao = descricao;
-        caso.status = status;
-        caso.agente_id = agente_id;
-        return caso;
+    if (caso) {
+        caso.titulo = titulo
+        caso.descricao = descricao
+        caso.status = status
+        caso.agente_id = agente_id
+        return caso
     }
-    else
-        return null
 
+    return null
 }
 
 function patchById(id, updates){ // Updates é o objeto no qual virão os campos a serem atualizados

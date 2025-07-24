@@ -5,24 +5,54 @@ const handlerError = require('../utils/errorHandler')
 
 function getAllCasos(req, res) {
     try {
-        const { status, agente_id, orderBy } = req.query
+        const { status, agente_id, search, orderBy, order } = req.query
         let casos = casosRepository.findAll()
 
-        if (status)
-            casos = casos.filter(caso => caso.status === status)
+        if (search) {
+            const termo = search.toLowerCase()
+            casos = casos.filter(caso =>
+                caso.titulo.toLowerCase().includes(termo) ||
+                caso.descricao.toLowerCase().includes(termo)
+            )
+        }
+        if (status) {
+            const statusValidos = ['aberto', 'solucionado']
 
-        if (agente_id)
+            if (!statusValidos.includes(status))
+                return res.status(400).json({ message: "O status do caso deve estar 'aberto' ou 'solucionado'" })
+            casos = casos.filter(caso => caso.status === status)
+        }
+
+        if (agente_id) {
+            if (!agentesRepository.findById(agente_id))
+                return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
+
             casos = casos.filter(caso => caso.agente_id === agente_id)
+        }
 
         if (orderBy) {
+            const camposValidos = ['titulo', 'status', 'agente_id']
+            if (!camposValidos.includes(orderBy))
+                return res.status(400).json({ message: `Campo para ordenação inválido. Use: ${camposValidos.join(', ')}` })
+
             casos.sort((a, b) => {
-                if (a[orderBy] < b[orderBy]) return -1
-                if (a[orderBy] > b[orderBy]) return 1
+                const ordem = order === 'desc' ? -1 : 1
+                if (a[orderBy] < b[orderBy]) return -1 * ordem
+                if (a[orderBy] > b[orderBy]) return 1 * ordem
                 return 0
             })
         }
 
-        res.status(200).json(casos)
+        if (order && order !== 'asc' && order !== 'desc') {
+            return res.status(400).json({ message: "Parâmetro 'order' inválido. Use 'asc' ou 'desc'." })
+        }
+
+        const casosComAgente = casos.map(caso => ({
+            ...caso,
+            agente: agentesRepository.findById(caso.agente_id)
+        }))
+
+        res.status(200).json(casosComAgente)
     } catch (error) {
         handlerError(res, error)
     }
@@ -35,8 +65,14 @@ function getSpecificCase(req, res) {
 
         if (!caso)
             return res.status(404).json({ message: "Caso não encontrado" })
-        else
-            res.status(200).json(caso)
+
+        const agente = agentesRepository.findById(caso.agente_id)
+
+        res.status(200).json({
+            ...caso,
+            agente
+        })
+
     } catch (error) {
         handlerError(res, error)
     }
@@ -49,7 +85,7 @@ function createCase(req, res) {
         const agenteExistente = agentesRepository.findById(agente_id)
 
         if (!agenteExistente)
-            return res.status(400).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+            return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
 
         if (!titulo || !descricao || !status || !agente_id)
             return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
@@ -69,11 +105,12 @@ function createCase(req, res) {
 function updateCase(req, res) {
     try {
         const { id } = req.params
+        delete req.body.id
         const { titulo, descricao, status, agente_id } = req.body
         const agenteExistente = agentesRepository.findById(agente_id)
 
         if (!agenteExistente)
-            return res.status(400).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+            return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
 
         if (!titulo || !descricao || !status || !agente_id)
             return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
@@ -84,9 +121,9 @@ function updateCase(req, res) {
         const updatedCase = casosRepository.update(id, titulo, descricao, status, agente_id)
 
         if (!updatedCase)
-            return res.status(400).json({ message: "Caso não encontrado!" })
+            return res.status(404).json({ message: "Caso não encontrado!" })
 
-        res.status(200).json({ message: "Caso atualizado!", caso: updatedCase })
+        res.status(200).json(updatedCase)
     } catch (error) {
         handlerError(res, error)
     }
@@ -95,6 +132,7 @@ function updateCase(req, res) {
 function patchCase(req, res) {
     try {
         const { id } = req.params
+        delete req.body.id
         const updates = req.body
         const camposValidos = ['titulo', 'descricao', 'status', 'agente_id']
 
@@ -111,7 +149,7 @@ function patchCase(req, res) {
         if (updates.agente_id) {
             const agenteExistente = agentesRepository.findById(updates.agente_id)
             if (!agenteExistente)
-                return res.status(400).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+                return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
         }
 
         const updatedCase = casosRepository.patchById(id, updates)
@@ -119,7 +157,7 @@ function patchCase(req, res) {
         if (!updatedCase)
             return res.status(404).json({ message: "Caso não encontrado!" })
 
-        res.status(200).json({ message: "Caso atualizado parcialmente", updatedCase })
+        res.status(200).json(updatedCase)
     } catch (error) {
         handlerError(res, error)
     }
