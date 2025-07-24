@@ -96,7 +96,10 @@ function createAgente(req, res) {
 function updateAgente(req, res) {
     try {
         const { id } = req.params
-        const { nome, dataDeIncorporacao, cargo } = req.body
+        const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
+
+        if(idBody && idBody !== id)
+            return res.status(400).json({message: "Não é permitido mudar o id do agente"})
 
         if (!validarData(dataDeIncorporacao))
             return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })

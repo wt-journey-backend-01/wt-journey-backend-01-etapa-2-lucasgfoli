@@ -1,124 +1,130 @@
 /**
  * @swagger
  * tags:
- *   name: Casos
- *   description: Endpoints para gerenciamento de casos policiais
+ *   name: Agentes
+ *   description: Endpoints para gerenciamento de agentes
  */
 
 /**
  * @swagger
- * /casos:
+ * /agentes:
  *   get:
- *     summary: Retorna todos os casos
- *     tags: [Casos]
+ *     summary: Retorna todos os agentes
+ *     tags: [Agentes]
  *     parameters:
  *       - in: query
- *         name: status
+ *         name: cargo
  *         schema:
  *           type: string
- *           enum: [aberto, solucionado]
- *         description: Filtrar casos pelo status
+ *         description: Filtrar agentes pelo cargo
  *       - in: query
- *         name: agente_id
+ *         name: dataDeIncorporacao
  *         schema:
  *           type: string
- *           format: uuid
- *         description: Filtrar casos pelo ID do agente
+ *           format: date
+ *         description: Filtrar pela data de incorporação (YYYY-MM-DD)
  *       - in: query
  *         name: orderBy
  *         schema:
  *           type: string
- *         description: Ordenar por um campo (ex: titulo, status)
+ *           enum: [nome, dataDeIncorporacao, cargo]
+ *         description: Campo usado para ordenação
+ *       - in: query
+ *         name: order
+ *         schema:
+ *           type: string
+ *           enum: [asc, desc]
+ *         description: Ordem da ordenação (ascendente ou descendente)
  *     responses:
  *       200:
- *         description: Lista de casos
+ *         description: Lista de agentes
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
- *                 $ref: '#/components/schemas/Caso'
- *
+ *                 $ref: '#/components/schemas/Agente'
+ * 
  *   post:
- *     summary: Cria um novo caso
- *     tags: [Casos]
+ *     summary: Cadastra um novo agente
+ *     tags: [Agentes]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CasoInput'
+ *             $ref: '#/components/schemas/AgenteInput'
  *     responses:
  *       201:
- *         description: Caso criado com sucesso
+ *         description: Agente criado com sucesso
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Caso'
+ *               $ref: '#/components/schemas/Agente'
  */
 
 /**
  * @swagger
- * /casos/{id}:
+ * /agentes/{id}:
  *   get:
- *     summary: Retorna um caso pelo ID
- *     tags: [Casos]
+ *     summary: Retorna um agente pelo ID
+ *     tags: [Agentes]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
  *           format: uuid
- *         required: true
- *         description: ID do caso
+ *         description: ID do agente
  *     responses:
  *       200:
- *         description: Dados do caso
+ *         description: Dados do agente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Caso'
+ *               $ref: '#/components/schemas/Agente'
  *       404:
- *         description: Caso não encontrado
- *
+ *         description: Agente não encontrado
+ * 
  *   put:
- *     summary: Atualiza um caso pelo ID (substituição total)
- *     tags: [Casos]
+ *     summary: Atualiza um agente pelo ID (substituição total)
+ *     tags: [Agentes]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
  *           format: uuid
- *         required: true
- *         description: ID do caso
+ *         description: ID do agente
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CasoInput'
+ *             $ref: '#/components/schemas/AgenteInput'
  *     responses:
  *       200:
- *         description: Caso atualizado
+ *         description: Agente atualizado
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Caso'
+ *               $ref: '#/components/schemas/Agente'
  *       404:
- *         description: Caso não encontrado
- *
+ *         description: Agente não encontrado
+ * 
  *   patch:
- *     summary: Atualiza parcialmente um caso pelo ID
- *     tags: [Casos]
+ *     summary: Atualiza parcialmente um agente pelo ID
+ *     tags: [Agentes]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
  *           format: uuid
- *         required: true
- *         description: ID do caso
+ *         description: ID do agente
  *     requestBody:
  *       required: true
  *       content:
@@ -126,136 +132,93 @@
  *           schema:
  *             type: object
  *             properties:
- *               titulo:
+ *               nome:
  *                 type: string
- *               descricao:
+ *               dataDeIncorporacao:
  *                 type: string
- *               status:
+ *                 format: date
+ *               cargo:
  *                 type: string
- *                 enum: [aberto, solucionado]
- *               agente_id:
- *                 type: string
- *                 format: uuid
  *     responses:
  *       200:
- *         description: Caso atualizado parcialmente
+ *         description: Agente atualizado parcialmente
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/Caso'
+ *               $ref: '#/components/schemas/Agente'
  *       400:
  *         description: Erro na validação dos dados
  *       404:
- *         description: Caso não encontrado
- *
+ *         description: Agente não encontrado
+ * 
  *   delete:
- *     summary: Remove um caso pelo ID
- *     tags: [Casos]
+ *     summary: Remove um agente pelo ID
+ *     tags: [Agentes]
  *     parameters:
  *       - in: path
  *         name: id
+ *         required: true
  *         schema:
  *           type: string
  *           format: uuid
- *         required: true
- *         description: ID do caso
+ *         description: ID do agente
  *     responses:
  *       204:
- *         description: Caso removido com sucesso
+ *         description: Agente removido com sucesso
  *       404:
- *         description: Caso não encontrado
+ *         description: Agente não encontrado
  */
 
 /**
  * @swagger
  * components:
  *   schemas:
- *     Caso:
+ *     Agente:
  *       type: object
  *       required:
  *         - id
- *         - titulo
- *         - descricao
- *         - status
- *         - agente_id
+ *         - nome
+ *         - dataDeIncorporacao
+ *         - cargo
  *       properties:
  *         id:
  *           type: string
  *           format: uuid
- *           description: ID do caso
- *         titulo:
+ *           description: ID do agente
+ *         nome:
  *           type: string
- *           description: Título do caso
- *         descricao:
+ *           description: Nome do agente
+ *         dataDeIncorporacao:
  *           type: string
- *           description: Descrição detalhada do caso
- *         status:
+ *           format: date
+ *           description: Data de incorporação no serviço
+ *         cargo:
  *           type: string
- *           enum: [aberto, solucionado]
- *           description: Status do caso
- *         agente_id:
- *           type: string
- *           format: uuid
- *           description: ID do agente responsável pelo caso
+ *           description: Cargo do agente (ex: delegado, investigador)
  *       example:
  *         id: "123e4567-e89b-12d3-a456-426614174000"
- *         titulo: "Roubo no banco"
- *         descricao: "Roubo com reféns ocorrido no centro da cidade."
- *         status: "aberto"
- *         agente_id: "123e4567-e89b-12d3-a456-426614174000"
+ *         nome: "Maria Silva"
+ *         dataDeIncorporacao: "2019-05-15"
+ *         cargo: "investigador"
  * 
- *     CasoInput:
+ *     AgenteInput:
  *       type: object
  *       required:
- *         - titulo
- *         - descricao
- *         - status
- *         - agente_id
+ *         - nome
+ *         - dataDeIncorporacao
+ *         - cargo
  *       properties:
- *         titulo:
+ *         nome:
  *           type: string
- *         descricao:
+ *         dataDeIncorporacao:
  *           type: string
- *         status:
+ *           format: date
+ *         cargo:
  *           type: string
- *           enum: [aberto, solucionado]
- *         agente_id:
- *           type: string
- *           format: uuid
  *       example:
- *         titulo: "Roubo no banco"
- *         descricao: "Roubo com reféns ocorrido no centro da cidade."
- *         status: "aberto"
- *         agente_id: "123e4567-e89b-12d3-a456-426614174000"
- * parameters:
-  - name: status
-    in: query
-    schema:
-      type: string
-      enum: [aberto, solucionado]
-    description: Filtra os casos pelo status
-  - name: agente_id
-    in: query
-    schema:
-      type: string
-    description: Filtra os casos por agente responsável
-  - name: search
-    in: query
-    schema:
-      type: string
-    description: Palavras-chave para busca no título ou descrição
-  - name: orderBy
-    in: query
-    schema:
-      type: string
-      enum: [titulo, status, agente_id]
-    description: Campo usado para ordenação dos resultados
-  - name: order
-    in: query
-    schema:
-      type: string
-      enum: [asc, desc]
-    description: Define a ordem da ordenação (ascendente ou descendente)
+ *         nome: "Maria Silva"
+ *         dataDeIncorporacao: "2019-05-15"
+ *         cargo: "investigador"
  */
 
 const express = require('express')

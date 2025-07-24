@@ -207,7 +207,7 @@
  *       example:
  *         nome: "Maria Silva"
  *         dataDeIncorporacao: "2019-05-15"
- *         cargo: "Investigador"
+ *         cargo: "Investigador" 
  */
 
 const express = require('express')
