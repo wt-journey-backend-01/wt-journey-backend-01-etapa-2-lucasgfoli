@@ -227,6 +227,35 @@
  *         descricao: "Roubo com reféns ocorrido no centro da cidade."
  *         status: "aberto"
  *         agente_id: "123e4567-e89b-12d3-a456-426614174000"
+ * parameters:
+  - name: status
+    in: query
+    schema:
+      type: string
+      enum: [aberto, solucionado]
+    description: Filtra os casos pelo status
+  - name: agente_id
+    in: query
+    schema:
+      type: string
+    description: Filtra os casos por agente responsável
+  - name: search
+    in: query
+    schema:
+      type: string
+    description: Palavras-chave para busca no título ou descrição
+  - name: orderBy
+    in: query
+    schema:
+      type: string
+      enum: [titulo, status, agente_id]
+    description: Campo usado para ordenação dos resultados
+  - name: order
+    in: query
+    schema:
+      type: string
+      enum: [asc, desc]
+    description: Define a ordem da ordenação (ascendente ou descendente)
  */
 
 const express = require('express')

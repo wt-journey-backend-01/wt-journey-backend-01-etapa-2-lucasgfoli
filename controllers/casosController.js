@@ -15,11 +15,12 @@ function getAllCasos(req, res) {
                 caso.descricao.toLowerCase().includes(termo)
             )
         }
+
         if (status) {
             const statusValidos = ['aberto', 'solucionado']
-
             if (!statusValidos.includes(status))
-                return res.status(400).json({ message: "O status do caso deve estar 'aberto' ou 'solucionado'" })
+                return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
+
             casos = casos.filter(caso => caso.status === status)
         }
 
@@ -33,7 +34,9 @@ function getAllCasos(req, res) {
         if (orderBy) {
             const camposValidos = ['titulo', 'status', 'agente_id']
             if (!camposValidos.includes(orderBy))
-                return res.status(400).json({ message: `Campo para ordenação inválido. Use: ${camposValidos.join(', ')}` })
+                return res.status(400).json({
+                    message: `Campo para ordenação inválido. Use: ${camposValidos.join(', ')}.`
+                })
 
             casos.sort((a, b) => {
                 const ordem = order === 'desc' ? -1 : 1
@@ -47,12 +50,12 @@ function getAllCasos(req, res) {
             return res.status(400).json({ message: "Parâmetro 'order' inválido. Use 'asc' ou 'desc'." })
         }
 
-        const casosComAgente = casos.map(caso => ({
+        const casosComMesmoAgente = casos.map(caso => ({
             ...caso,
             agente: agentesRepository.findById(caso.agente_id)
         }))
 
-        res.status(200).json(casosComAgente)
+        res.status(200).json(casosComMesmoAgente)
     } catch (error) {
         handlerError(res, error)
     }
@@ -64,7 +67,7 @@ function getSpecificCase(req, res) {
         const caso = casosRepository.findById(id)
 
         if (!caso)
-            return res.status(404).json({ message: "Caso não encontrado" })
+            return res.status(404).json({ message: "Caso não encontrado." })
 
         const agente = agentesRepository.findById(caso.agente_id)
 
@@ -72,7 +75,6 @@ function getSpecificCase(req, res) {
             ...caso,
             agente
         })
-
     } catch (error) {
         handlerError(res, error)
     }
@@ -84,14 +86,20 @@ function createCase(req, res) {
         const id = uuidv4()
         const agenteExistente = agentesRepository.findById(agente_id)
 
+        if (typeof titulo !== 'string')
+            return res.status(400).json({ message: "O título deve ser uma string." })
+
+        if (typeof descricao !== 'string')
+            return res.status(400).json({ message: "A descrição deve ser uma string." })
+
         if (!agenteExistente)
-            return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
 
         if (!titulo || !descricao || !status || !agente_id)
-            return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
+            return res.status(400).json({ message: "Todos os campos são obrigatórios." })
 
         if (status !== "aberto" && status !== "solucionado")
-            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'!" })
+            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
         const newCase = { id, titulo, descricao, status, agente_id }
         casosRepository.create(newCase)
@@ -105,23 +113,28 @@ function createCase(req, res) {
 function updateCase(req, res) {
     try {
         const { id } = req.params
-        delete req.body.id
         const { titulo, descricao, status, agente_id } = req.body
         const agenteExistente = agentesRepository.findById(agente_id)
 
+        if (typeof titulo !== 'string')
+            return res.status(400).json({ message: "O título deve ser uma string." })
+
+        if (typeof descricao !== 'string')
+            return res.status(400).json({ message: "A descrição deve ser uma string." })
+
         if (!agenteExistente)
-            return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+            return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
 
         if (!titulo || !descricao || !status || !agente_id)
-            return res.status(400).json({ message: "Todos os campos são obrigatórios!" })
+            return res.status(400).json({ message: "Todos os campos são obrigatórios." })
 
         if (status !== "aberto" && status !== "solucionado")
-            return res.status(400).json({ message: "O status deve ser 'aberto' ou 'solucionado'" })
+            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
         const updatedCase = casosRepository.update(id, titulo, descricao, status, agente_id)
 
         if (!updatedCase)
-            return res.status(404).json({ message: "Caso não encontrado!" })
+            return res.status(404).json({ message: "Caso não encontrado." })
 
         res.status(200).json(updatedCase)
     } catch (error) {
@@ -132,7 +145,6 @@ function updateCase(req, res) {
 function patchCase(req, res) {
     try {
         const { id } = req.params
-        delete req.body.id
         const updates = req.body
         const camposValidos = ['titulo', 'descricao', 'status', 'agente_id']
 
@@ -140,22 +152,28 @@ function patchCase(req, res) {
             return camposValidos.includes(campo)
         })
 
+        if (updates.titulo && typeof updates.titulo !== 'string')
+            return res.status(400).json({ message: "O título deve ser uma string." })
+
+        if (updates.descricao && typeof updates.descricao !== 'string')
+            return res.status(400).json({ message: "A descrição deve ser uma string." })
+
         if (camposAtualizaveis.length === 0)
-            return res.status(400).json({ message: "Deve conter pelo menos um campo!" })
+            return res.status(400).json({ message: "Deve conter pelo menos um campo para atualização." })
 
         if (updates.status && updates.status !== "aberto" && updates.status !== "solucionado")
-            return res.status(400).json({ message: "O status deve ser 'aberto' ou 'solucionado'" })
+            return res.status(400).json({ message: "O status do caso deve ser 'aberto' ou 'solucionado'." })
 
         if (updates.agente_id) {
             const agenteExistente = agentesRepository.findById(updates.agente_id)
             if (!agenteExistente)
-                return res.status(404).json({ message: "Agente não encontrado pelo agente_id fornecido" })
+                return res.status(404).json({ message: "Agente não encontrado com o agente_id fornecido." })
         }
 
         const updatedCase = casosRepository.patchById(id, updates)
 
         if (!updatedCase)
-            return res.status(404).json({ message: "Caso não encontrado!" })
+            return res.status(404).json({ message: "Caso não encontrado." })
 
         res.status(200).json(updatedCase)
     } catch (error) {
@@ -169,7 +187,7 @@ function deleteCase(req, res) {
         const casoDeletado = casosRepository.findById(id)
 
         if (!casoDeletado)
-            return res.status(404).json({ message: "Caso não encontrado" })
+            return res.status(404).json({ message: "Caso não encontrado." })
 
         casosRepository.deleteById(id)
         res.status(204).send()
