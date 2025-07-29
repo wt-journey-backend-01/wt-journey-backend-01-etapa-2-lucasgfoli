@@ -2,9 +2,9 @@
 
 # 🧪 Relatório de Avaliação – Journey Levty Etapa 1 - lucasgfoli
 
-**Data:** 29/07/2025 22:07
+**Data:** 29/07/2025 22:17
 
-**Nota Final:** `97.81/100`
+**Nota Final:** `100.00/100`
 **Status:** ✅ Aprovado
 
 ---
@@ -19,9 +19,7 @@
     - Ótimo! A filtragem de casos por `agente_id` (`GET /casos?agente_id=...`) está funcionando corretamente. Isso permite listar casos específicos de cada agente.
 
 ## ❌ Problemas Detectados (Descontos de até 100 pontos)
-- Foram encontrados `1` problemas que acarretam descontos. Veja abaixo os testes penalizados:
-  - ⚠️ **Falhou no teste de penalidade**: `Validation: Consegue alterar ID do caso com método PUT`
-    - **Correção sugerida**: Nenhuma sugestão de correção disponível.
+- Nenhuma infração grave foi detectada. Muito bom nesse aspecto!
 
 ---
 Continue praticando e caprichando no código. Cada detalhe conta! 💪
