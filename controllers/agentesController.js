@@ -99,7 +99,7 @@ function updateAgente(req, res) {
         const { nome, dataDeIncorporacao, cargo, id: idBody } = req.body
 
         if(idBody && idBody !== id)
-            return res.status(400).json({message: "Não é permitido mudar o id do agente"})
+            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
 
         if (!validarData(dataDeIncorporacao))
             return res.status(400).json({ message: 'Data de incorporação inválida. Use o formato YYYY-MM-DD e não informe datas futuras.' })
@@ -123,6 +123,9 @@ function patchAgente(req, res) {
         const { id } = req.params
         const updates = req.body
         const camposValidos = ['nome', 'dataDeIncorporacao', 'cargo']
+
+        if('id' in updates)
+            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
 
         const camposAtualizaveis = Object.keys(updates).filter(campo => camposValidos.includes(campo))
 

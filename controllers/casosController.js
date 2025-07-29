@@ -113,8 +113,11 @@ function createCase(req, res) {
 function updateCase(req, res) {
     try {
         const { id } = req.params
-        const { titulo, descricao, status, agente_id } = req.body
+        const { id: idBody, titulo, descricao, status, agente_id } = req.body
         const agenteExistente = agentesRepository.findById(agente_id)
+
+        if(idBody && idBody !== id)
+            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
 
         if (typeof titulo !== 'string')
             return res.status(400).json({ message: "O título deve ser uma string." })
@@ -147,6 +150,9 @@ function patchCase(req, res) {
         const { id } = req.params
         const updates = req.body
         const camposValidos = ['titulo', 'descricao', 'status', 'agente_id']
+
+        if('id' in updates)
+            return res.status(400).json({message: "O campo 'id' não pode ser alterado."})
 
         const camposAtualizaveis = Object.keys(updates).filter(campo => {
             return camposValidos.includes(campo)
