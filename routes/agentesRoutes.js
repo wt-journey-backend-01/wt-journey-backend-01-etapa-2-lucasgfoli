@@ -12,22 +12,27 @@
  *     summary: Retorna todos os agentes
  *     tags: [Agentes]
  *     parameters:
- *       - in: query
- *         name: cargo
- *         schema:
- *           type: string
- *         description: Filtrar agentes pelo cargo
- *       - in: query
- *         name: dataDeIncorporacao
- *         schema:
- *           type: string
- *           format: date
- *         description: Filtrar agentes pela data de incorporação (YYYY-MM-DD)
- *       - in: query
- *         name: orderBy
- *         schema:
- *           type: string
- *         description: Ordenar por um campo (ex: nome, dataDeIncorporacao)
+  - in: query
+    name: dataInicio
+    schema:
+      type: string
+      format: date
+    description: Data inicial para filtrar agentes pela data de incorporação
+
+  - in: query
+    name: dataFim
+    schema:
+      type: string
+      format: date
+    description: Data final para filtrar agentes pela data de incorporação
+
+  - in: query
+    name: dataDeIncorporacao
+    schema:
+      type: string
+      format: date
+    description: Data exata de incorporação para filtro
+
  *     responses:
  *       200:
  *         description: Lista de agentes
